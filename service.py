@@ -20,5 +20,23 @@ def add_booking(bookings: list[Booking], room: str, start: int, end: int) -> Boo
 
 def move_booking(bookings: list[Booking], booking_id: int, new_room: str,
                  new_start: int, new_end: int) -> Booking:
-    """See SPEC.md. This stub deliberately has no implementation yet."""
-    raise NotImplementedError("Week 3: implement the agreed rescheduling feature")
+    booking = find_booking(bookings, booking_id)
+    if booking.status != "active":
+        raise ValueError("Cannot move a cancelled booking")
+
+    validate_room(new_room)
+    validate_interval(new_start, new_end)
+    if any(
+        other is not booking
+        and other.status == "active"
+        and other.room == new_room
+        and new_start < other.end
+        and other.start < new_end
+        for other in bookings
+    ):
+        raise ValueError("Booking conflict")
+
+    booking.room = new_room
+    booking.start = new_start
+    booking.end = new_end
+    return booking
